@@ -1,9 +1,8 @@
-# app.py - FIXED VERSION
-from flask import Flask, jsonify, request
-import os
-from datetime import datetime
+import streamlit as st
 import pandas as pd
 import numpy as np
+from datetime import datetime
+import os
 
 # Try to import CORS, if not available, continue without it
 try:
@@ -617,4 +616,5 @@ if __name__ == '__main__':
     os.makedirs('uploads', exist_ok=True)
     os.makedirs('data', exist_ok=True)
     
+
     app.run(host='0.0.0.0', port=8000, debug=True)
