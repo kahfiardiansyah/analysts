@@ -1,3 +1,5 @@
 streamlit
 polars
 openpyxl
+flask
+flask-cors
