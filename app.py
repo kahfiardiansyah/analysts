@@ -5,68 +5,66 @@ from datetime import datetime
 import os
 
 # ============================================================================
-# MANUAL 50 QUESTIONS LIST
+# MANUAL 50 QUESTIONS LIST - FORMAT PERINTAH
 # ============================================================================
 MANUAL_QUESTIONS = [
-    # A. Analisis Deskriptif (1-10)
-    "Bagaimana cara melihat total penjualan secara keseluruhan?",
-    "Bagaimana menghitung rata-rata penjualan per bulan?",
-    "Bagaimana mencari produk terlaris?",
-    "Bagaimana mengetahui pelanggan dengan pembelian terbanyak?",
-    "Bagaimana menghitung persentase pertumbuhan penjualan dari bulan ke bulan?",
-    "Bagaimana mencari nilai maksimum dan minimum dari kolom tertentu?",
-    "Bagaimana menghitung distribusi penjualan berdasarkan kategori produk?",
-    "Bagaimana menghitung rasio pelanggan baru dan pelanggan lama?",
-    "Bagaimana membuat summary statistik dari dataset?",
-    "Bagaimana menghitung total transaksi per kota atau cabang?",
+    # A. ANALISIS DESKRIPTIF & EXPLORASI (1-15)
+    "Hitung total penjualan secara keseluruhan",
+    "Tampilkan rata-rata penjualan per bulan", 
+    "Cari produk terlaris berdasarkan jumlah transaksi",
+    "Identifikasi pelanggan dengan pembelian terbanyak",
+    "Hitung persentase pertumbuhan penjualan bulanan",
+    "Temukan nilai maksimum dan minimum dari setiap kolom numerik",
+    "Analisis distribusi penjualan berdasarkan kategori produk",
+    "Hitung rasio antara pelanggan baru dan pelanggan lama",
+    "Buat summary statistik lengkap dari dataset",
+    "Hitung total transaksi per kota atau region",
+    "Cari korelasi antara variabel numerik dalam dataset", 
+    "Deteksi outlier dalam data penjualan",
+    "Analisis tren penjualan berdasarkan timeline",
+    "Identifikasi variabel yang paling berpengaruh terhadap target",
+    "Bandingkan rata-rata penjualan antar kategori produk",
     
-    # B. Analisis Eksploratif (11-20)
-    "Bagaimana mencari korelasi antara dua variabel?",
-    "Bagaimana mendeteksi outlier dalam data penjualan?",
-    "Bagaimana melihat tren penjualan berdasarkan waktu?",
-    "Bagaimana mengetahui variabel yang paling berpengaruh terhadap target?",
-    "Bagaimana menghitung perbedaan rata-rata antar dua kelompok?",
-    "Bagaimana mengetahui pola pembelian pelanggan tertentu?",
-    "Bagaimana mengelompokkan pelanggan berdasarkan perilaku belanja?",
-    "Bagaimana melihat distribusi data dalam bentuk visual?",
-    "Bagaimana mendeteksi nilai hilang dalam dataset?",
-    "Bagaimana melakukan imputasi untuk nilai yang hilang?",
+    # B. DATA PREPARATION & CLEANING (16-25)
+    "Baca dan tampilkan struktur dataset yang diupload",
+    "Hapus data duplikat dari dataset",
+    "Ganti nama kolom yang tidak deskriptif", 
+    "Ubah tipe data kolom yang tidak sesuai",
+    "Filter data berdasarkan kondisi tertentu",
+    "Gabungkan dataset dengan file external jika ada",
+    "Buat kolom baru hasil perhitungan atau transformasi",
+    "Lakukan encoding pada variabel kategorikal",
+    "Normalisasi data numerik untuk analisis lebih lanjut", 
+    "Ekspor dataset hasil cleaning ke file baru",
     
-    # C. Analisis Prediktif (21-30)
-    "Bagaimana membuat prediksi penjualan untuk bulan depan?",
-    "Bagaimana membuat model regresi sederhana?",
-    "Bagaimana memprediksi pelanggan yang akan churn?",
-    "Bagaimana memilih model machine learning terbaik?",
-    "Bagaimana membagi dataset menjadi data train dan test?",
-    "Bagaimana melakukan validasi silang?",
-    "Bagaimana menghitung metrik evaluasi?",
-    "Bagaimana menampilkan importance dari tiap fitur?",
-    "Bagaimana menyimpan dan memuat ulang model?",
-    "Bagaimana membuat prediksi otomatis dari input user?",
+    # C. VISUALISASI DATA (26-40)
+    "Buat grafik batang untuk penjualan per produk",
+    "Buat grafik garis trend penjualan overtime", 
+    "Buat pie chart distribusi kategori produk",
+    "Buat heatmap korelasi antar variabel numerik",
+    "Buat scatter plot hubungan dua variabel numerik",
+    "Buat histogram distribusi nilai numerik",
+    "Buat box plot untuk analisis outlier",
+    "Buat bar chart horizontal perbandingan kategori", 
+    "Buat stacked bar chart komposisi penjualan",
+    "Buat area chart perkembangan kumulatif",
+    "Buat multiple subplot dalam satu layout",
+    "Buat dashboard interaktif sederhana",
+    "Ekspor visualisasi sebagai file gambar", 
+    "Buat laporan visual otomatis dari dataset",
+    "Buat comparative analysis chart antar segment",
     
-    # D. Data Preparation (31-40)
-    "Bagaimana membaca file CSV atau Excel dengan pandas?",
-    "Bagaimana menghapus duplikasi data?",
-    "Bagaimana mengganti nama kolom dalam dataframe?",
-    "Bagaimana mengubah tipe data kolom?",
-    "Bagaimana memfilter data berdasarkan kondisi tertentu?",
-    "Bagaimana menggabungkan dua dataset?",
-    "Bagaimana menambahkan kolom baru hasil perhitungan?",
-    "Bagaimana melakukan encoding pada variabel kategorikal?",
-    "Bagaimana melakukan normalisasi atau standarisasi data numerik?",
-    "Bagaimana menyimpan dataset hasil olahan menjadi file baru?",
-    
-    # E. Visualisasi Data (41-50)
-    "Bagaimana membuat grafik batang penjualan per produk?",
-    "Bagaimana membuat grafik garis untuk tren waktu?",
-    "Bagaimana membuat pie chart untuk proporsi kategori produk?",
-    "Bagaimana membuat heatmap untuk korelasi antar variabel?",
-    "Bagaimana membuat scatter plot antara dua variabel numerik?",
-    "Bagaimana menambahkan label dan judul pada grafik?",
-    "Bagaimana menampilkan beberapa grafik dalam satu layout?",
-    "Bagaimana menyimpan grafik sebagai file gambar?",
-    "Bagaimana membuat dashboard interaktif sederhana?",
-    "Bagaimana membuat visualisasi otomatis dari dataset?"
+    # D. ANALISIS LANJUTAN & INSIGHT (41-50)
+    "Buat segmentasi pelanggan berdasarkan RFM",
+    "Analisis pola pembelian pelanggan tertentu", 
+    "Identifikasi seasonality dalam data penjualan",
+    "Buat forecasting sederhana untuk periode berikutnya",
+    "Analisis customer lifetime value",
+    "Identifikasi produk yang sering dibeli bersama",
+    "Buat cohort analysis retention pelanggan", 
+    "Analisis sales funnel dan conversion rate",
+    "Buat performance benchmark antar periode",
+    "Generate actionable insights dari data"
 ]
 
 # ============================================================================
@@ -82,15 +80,15 @@ def main():
     
     # Sidebar
     st.sidebar.title("🎯 InsightFlow Analytics")
-    st.sidebar.markdown("### 50 Pertanyaan Data Analyst")
+    st.sidebar.markdown("### 50 Perintah Data Analyst")
     st.sidebar.markdown("---")
     
     # Main content
     st.title("📊 InsightFlow Analytics Dashboard")
-    st.markdown("Selamat datang! Upload file data Anda dan pilih pertanyaan analitis dari 50 pertanyaan yang tersedia.")
+    st.markdown("Selamat datang! Upload file data Anda dan pilih perintah analisis dari 50 perintah yang tersedia.")
     
     # Tab layout
-    tab1, tab2, tab3 = st.tabs(["📋 Pertanyaan", "📁 Upload Data", "🔍 Analisis"])
+    tab1, tab2, tab3 = st.tabs(["📋 Daftar Perintah", "📁 Upload Data", "🔍 Analisis Data"])
     
     with tab1:
         show_questions_tab()
@@ -102,30 +100,28 @@ def main():
         show_analysis_tab()
 
 def show_questions_tab():
-    """Display the 50 questions"""
-    st.header("📋 Daftar 50 Pertanyaan Analitis")
+    """Display the 50 commands"""
+    st.header("📋 Daftar 50 Perintah Analisis Data")
     st.markdown("""
-    **Kategori Pertanyaan:**
-    - **1-10:** Analisis Deskriptif
-    - **11-20:** Analisis Eksploratif  
-    - **21-30:** Analisis Prediktif
-    - **31-40:** Data Preparation
-    - **41-50:** Visualisasi Data
+    **Kategori Perintah:**
+    - **1-15:** Analisis Deskriptif & Eksplorasi
+    - **16-25:** Data Preparation & Cleaning  
+    - **26-40:** Visualisasi Data
+    - **41-50:** Analisis Lanjutan & Insight
     """)
     
-    # Display questions in expandable sections
+    # Display commands in expandable sections
     categories = {
-        "Analisis Deskriptif (1-10)": MANUAL_QUESTIONS[0:10],
-        "Analisis Eksploratif (11-20)": MANUAL_QUESTIONS[10:20],
-        "Analisis Prediktif (21-30)": MANUAL_QUESTIONS[20:30],
-        "Data Preparation (31-40)": MANUAL_QUESTIONS[30:40],
-        "Visualisasi Data (41-50)": MANUAL_QUESTIONS[40:50]
+        "Analisis Deskriptif & Eksplorasi (1-15)": MANUAL_QUESTIONS[0:15],
+        "Data Preparation & Cleaning (16-25)": MANUAL_QUESTIONS[15:25],
+        "Visualisasi Data (26-40)": MANUAL_QUESTIONS[25:40],
+        "Analisis Lanjutan & Insight (41-50)": MANUAL_QUESTIONS[40:50]
     }
     
-    for category, questions in categories.items():
+    for category, commands in categories.items():
         with st.expander(f"📂 {category}"):
-            for i, question in enumerate(questions, start=1):
-                st.write(f"**{i}.** {question}")
+            for i, command in enumerate(commands, start=1):
+                st.write(f"**{i}.** {command}")
 
 def show_upload_tab():
     """Handle file upload and display"""
@@ -212,23 +208,23 @@ def show_analysis_tab():
     
     df = st.session_state.df
     
-    # Question selection
-    st.subheader("🎯 Pilih Pertanyaan Analitis")
-    selected_question = st.selectbox(
-        "Pilih pertanyaan:",
+    # Command selection
+    st.subheader("🎯 Pilih Perintah Analisis")
+    selected_command = st.selectbox(
+        "Pilih perintah:",
         options=MANUAL_QUESTIONS,
         index=0,
-        help="Pilih salah satu dari 50 pertanyaan analitis"
+        help="Pilih salah satu dari 50 perintah analisis data"
     )
     
-    # Additional parameters based on question type
+    # Additional parameters based on command type
     st.subheader("⚙️ Parameter Analisis")
     
-    question_lower = selected_question.lower()
+    command_lower = selected_command.lower()
     
-    # Dynamic parameter selection based on question type
-    if any(word in question_lower for word in ['total', 'rata', 'average', 'max', 'min', 'tren']):
-        # Questions about numeric data
+    # Dynamic parameter selection based on command type
+    if any(word in command_lower for word in ['hitung', 'tampilkan', 'rata', 'average', 'max', 'min', 'tren', 'total']):
+        # Commands about numeric data
         if st.session_state.numeric_columns:
             numeric_column = st.selectbox(
                 "Pilih kolom numerik untuk dianalisis:",
@@ -238,8 +234,8 @@ def show_analysis_tab():
             numeric_column = None
             st.warning("❌ Tidak ada kolom numerik dalam dataset")
     
-    if any(word in question_lower for word in ['terlaris', 'terbanyak', 'top', 'distribusi', 'kelompok']):
-        # Questions about categorical data
+    if any(word in command_lower for word in ['cari', 'identifikasi', 'terlaris', 'terbanyak', 'top', 'distribusi', 'kelompok', 'kategori']):
+        # Commands about categorical data
         if st.session_state.categorical_columns:
             categorical_column = st.selectbox(
                 "Pilih kolom kategorikal untuk dianalisis:",
@@ -249,7 +245,7 @@ def show_analysis_tab():
             categorical_column = None
             st.warning("❌ Tidak ada kolom kategorikal dalam dataset")
     
-    if any(word in question_lower for word in ['korelasi']):
+    if any(word in command_lower for word in ['korelasi']):
         # Correlation analysis needs multiple numeric columns
         if len(st.session_state.numeric_columns) >= 2:
             st.info("🔗 Analisis korelasi akan membandingkan semua kolom numerik")
@@ -257,20 +253,20 @@ def show_analysis_tab():
             st.warning("❌ Diperlukan minimal 2 kolom numerik untuk analisis korelasi")
     
     # Analysis button
-    if st.button("🚀 Jalankan Analisis", type="primary", use_container_width=True):
+    if st.button("🚀 Jalankan Perintah", type="primary", use_container_width=True):
         with st.spinner("🔄 Menjalankan analisis..."):
             try:
-                # Perform analysis based on question type
-                result = perform_analysis(df, selected_question, 
+                # Perform analysis based on command type
+                result = perform_analysis(df, selected_command, 
                                         numeric_column if 'numeric_column' in locals() else None,
                                         categorical_column if 'categorical_column' in locals() else None)
                 
                 # Display results
                 st.subheader("📊 Hasil Analisis")
-                st.success(f"**Pertanyaan:** {selected_question}")
+                st.success(f"**Perintah:** {selected_command}")
                 
                 if 'answer' in result:
-                    st.info(f"**Jawaban:** {result['answer']}")
+                    st.info(f"**Hasil:** {result['answer']}")
                 
                 if 'insights' in result:
                     st.subheader("💡 Insights")
@@ -289,42 +285,46 @@ def show_analysis_tab():
             except Exception as e:
                 st.error(f"❌ Error dalam analisis: {str(e)}")
 
-def perform_analysis(df, question, numeric_col=None, categorical_col=None):
-    """Perform analysis based on question type"""
-    question_lower = question.lower()
+def perform_analysis(df, command, numeric_col=None, categorical_col=None):
+    """Perform analysis based on command type"""
+    command_lower = command.lower()
     
-    # Basic pattern matching for different question types
-    if any(word in question_lower for word in ['total', 'jumlah', 'sum']):
-        return handle_total_analysis(df, question, numeric_col)
-    elif any(word in question_lower for word in ['rata', 'average', 'mean']):
-        return handle_average_analysis(df, question, numeric_col)
-    elif any(word in question_lower for word in ['maksimum', 'minimum', 'max', 'min']):
-        return handle_minmax_analysis(df, question, numeric_col)
-    elif any(word in question_lower for word in ['terlaris', 'terbanyak', 'top']):
-        return handle_top_analysis(df, question, categorical_col)
-    elif any(word in question_lower for word in ['tren', 'trend', 'perkembangan']):
-        return handle_trend_analysis(df, question, numeric_col)
-    elif any(word in question_lower for word in ['korelasi', 'correlation']):
-        return handle_correlation_analysis(df, question)
-    elif any(word in question_lower for word in ['distribusi', 'distribusi penjualan']):
-        return handle_distribution_analysis(df, question, categorical_col, numeric_col)
-    elif any(word in question_lower for word in ['summary', 'statistik']):
-        return handle_summary_analysis(df, question)
-    elif any(word in question_lower for word in ['nilai hilang', 'missing']):
-        return handle_missing_analysis(df, question)
-    elif any(word in question_lower for word in ['duplikasi', 'duplikat']):
-        return handle_duplicate_analysis(df, question)
-    elif any(word in question_lower for word in ['outlier']):
-        return handle_outlier_analysis(df, question, numeric_col)
+    # Basic pattern matching for different command types
+    if any(word in command_lower for word in ['hitung total', 'total']):
+        return handle_total_analysis(df, command, numeric_col)
+    elif any(word in command_lower for word in ['rata-rata', 'rata', 'average']):
+        return handle_average_analysis(df, command, numeric_col)
+    elif any(word in command_lower for word in ['maksimum', 'minimum', 'max', 'min']):
+        return handle_minmax_analysis(df, command, numeric_col)
+    elif any(word in command_lower for word in ['terlaris', 'terbanyak', 'top']):
+        return handle_top_analysis(df, command, categorical_col)
+    elif any(word in command_lower for word in ['tren', 'trend']):
+        return handle_trend_analysis(df, command, numeric_col)
+    elif any(word in command_lower for word in ['korelasi']):
+        return handle_correlation_analysis(df, command)
+    elif any(word in command_lower for word in ['distribusi']):
+        return handle_distribution_analysis(df, command, categorical_col, numeric_col)
+    elif any(word in command_lower for word in ['summary', 'statistik']):
+        return handle_summary_analysis(df, command)
+    elif any(word in command_lower for word in ['nilai hilang', 'missing']):
+        return handle_missing_analysis(df, command)
+    elif any(word in command_lower for word in ['duplikat', 'duplikasi']):
+        return handle_duplicate_analysis(df, command)
+    elif any(word in command_lower for word in ['outlier']):
+        return handle_outlier_analysis(df, command, numeric_col)
+    elif any(word in command_lower for word in ['visualisasi', 'grafik', 'chart']):
+        return handle_visualization_commands(df, command, numeric_col, categorical_col)
+    elif any(word in command_lower for word in ['segmentasi', 'rfm']):
+        return handle_segmentation_analysis(df, command)
     else:
-        return handle_general_analysis(df, question)
+        return handle_general_analysis(df, command)
 
-def handle_total_analysis(df, question, numeric_col):
-    """Handle total-related questions"""
+def handle_total_analysis(df, command, numeric_col):
+    """Handle total-related commands"""
     if numeric_col:
         total = df[numeric_col].sum()
         return {
-            'answer': f'Total {numeric_col}: {total:,.2f}',
+            'answer': f'✅ Total {numeric_col}: {total:,.2f}',
             'insights': [
                 f'📊 Total nilai pada kolom {numeric_col}: {total:,.2f}',
                 f'🔢 Berdasarkan {len(df)} baris data',
@@ -343,18 +343,18 @@ def handle_total_analysis(df, question, numeric_col):
         }
     else:
         return {
-            'answer': 'Tidak ada kolom numerik yang dipilih untuk analisis total',
+            'answer': '❌ Tidak ada kolom numerik yang dipilih untuk analisis total',
             'insights': ['Silakan pilih kolom numerik di parameter analisis'],
             'recommendations': ['Pilih kolom numerik seperti "sales", "price", "quantity" dll.']
         }
 
-def handle_average_analysis(df, question, numeric_col):
-    """Handle average-related questions"""
+def handle_average_analysis(df, command, numeric_col):
+    """Handle average-related commands"""
     if numeric_col:
         avg = df[numeric_col].mean()
         median = df[numeric_col].median()
         return {
-            'answer': f'Rata-rata {numeric_col}: {avg:,.2f}',
+            'answer': f'✅ Rata-rata {numeric_col}: {avg:,.2f}',
             'insights': [
                 f'📈 Rata-rata {numeric_col}: {avg:,.2f}',
                 f'📊 Median: {median:,.2f}',
@@ -374,12 +374,12 @@ def handle_average_analysis(df, question, numeric_col):
         }
     else:
         return {
-            'answer': 'Tidak ada kolom numerik yang dipilih untuk analisis rata-rata',
+            'answer': '❌ Tidak ada kolom numerik yang dipilih untuk analisis rata-rata',
             'insights': ['Silakan pilih kolom numerik di parameter analisis'],
             'recommendations': ['Pilih kolom numerik seperti "sales", "price", "quantity" dll.']
         }
 
-def handle_minmax_analysis(df, question, numeric_col):
+def handle_minmax_analysis(df, command, numeric_col):
     """Handle maximum/minimum analysis"""
     if numeric_col:
         max_val = df[numeric_col].max()
@@ -388,7 +388,7 @@ def handle_minmax_analysis(df, question, numeric_col):
         min_idx = df[numeric_col].idxmin()
         
         return {
-            'answer': f'Nilai maksimum {numeric_col}: {max_val:,.2f}, minimum: {min_val:,.2f}',
+            'answer': f'✅ Nilai maksimum {numeric_col}: {max_val:,.2f}, minimum: {min_val:,.2f}',
             'insights': [
                 f'📈 Nilai maksimum {numeric_col}: {max_val:,.2f}',
                 f'📉 Nilai minimum {numeric_col}: {min_val:,.2f}',
@@ -408,12 +408,12 @@ def handle_minmax_analysis(df, question, numeric_col):
         }
     else:
         return {
-            'answer': 'Tidak ada kolom numerik yang dipilih untuk analisis maksimum/minimum',
+            'answer': '❌ Tidak ada kolom numerik yang dipilih untuk analisis maksimum/minimum',
             'insights': ['Silakan pilih kolom numerik di parameter analisis']
         }
 
-def handle_top_analysis(df, question, categorical_col):
-    """Handle top-related questions"""
+def handle_top_analysis(df, command, categorical_col):
+    """Handle top-related commands"""
     if categorical_col:
         top_items = df[categorical_col].value_counts().head(10)
         total_categories = df[categorical_col].nunique()
@@ -427,20 +427,25 @@ def handle_top_analysis(df, question, categorical_col):
             f'🔢 Total data points: {len(df)}'
         ]
         
+        # Add more items if available
+        if len(top_items) > 3:
+            for i in range(3, min(6, len(top_items))):
+                insights.append(f'{i+1}. {top_items.index[i]} ({top_items.iloc[i]}x)')
+        
         return {
-            'answer': f'Top {categorical_col}: {top_items.index[0]} dengan {top_items.iloc[0]} occurrences',
+            'answer': f'✅ Top {categorical_col}: {top_items.index[0]} dengan {top_items.iloc[0]} occurrences',
             'insights': insights,
             'data': top_items.to_dict()
         }
     else:
         return {
-            'answer': 'Tidak ada kolom kategorikal yang dipilih untuk analisis top items',
+            'answer': '❌ Tidak ada kolom kategorikal yang dipilih untuk analisis top items',
             'insights': ['Silakan pilih kolom kategorikal di parameter analisis'],
             'recommendations': ['Pilih kolom seperti "product", "category", "region" dll.']
         }
 
-def handle_trend_analysis(df, question, numeric_col):
-    """Handle trend-related questions"""
+def handle_trend_analysis(df, command, numeric_col):
+    """Handle trend-related commands"""
     date_cols = df.select_dtypes(include=['datetime64']).columns
     
     if len(date_cols) > 0 and numeric_col:
@@ -460,18 +465,18 @@ def handle_trend_analysis(df, question, numeric_col):
             ]
             
             return {
-                'answer': f'Tren {numeric_col} berdasarkan waktu berhasil dianalisis',
+                'answer': f'✅ Tren {numeric_col} berdasarkan waktu berhasil dianalisis',
                 'insights': insights,
                 'data': monthly_trend.to_dict()
             }
         else:
             return {
-                'answer': f'Kolom {date_col} bukan tipe datetime yang valid',
+                'answer': f'❌ Kolom {date_col} bukan tipe datetime yang valid',
                 'insights': ['Pastikan kolom tanggal dalam format yang benar']
             }
     
     return {
-        'answer': 'Tidak cukup data untuk analisis tren',
+        'answer': '❌ Tidak cukup data untuk analisis tren',
         'insights': [
             'Diperlukan kolom tanggal dan kolom numerik',
             f'Kolom tanggal tersedia: {len(date_cols)}',
@@ -479,7 +484,7 @@ def handle_trend_analysis(df, question, numeric_col):
         ]
     }
 
-def handle_correlation_analysis(df, question):
+def handle_correlation_analysis(df, command):
     """Handle correlation analysis"""
     numeric_cols = df.select_dtypes(include=[np.number]).columns
     if len(numeric_cols) >= 2:
@@ -510,7 +515,7 @@ def handle_correlation_analysis(df, question):
         ]
         
         return {
-            'answer': f'Analisis korelasi antara {len(numeric_cols)} variabel numerik',
+            'answer': f'✅ Analisis korelasi antara {len(numeric_cols)} variabel numerik',
             'insights': insights,
             'data': {
                 'top_correlations': correlations[:10],
@@ -520,12 +525,12 @@ def handle_correlation_analysis(df, question):
         }
     else:
         return {
-            'answer': 'Tidak cukup kolom numerik untuk analisis korelasi',
+            'answer': '❌ Tidak cukup kolom numerik untuk analisis korelasi',
             'insights': ['Dibutuhkan minimal 2 kolom numerik untuk analisis korelasi'],
             'recommendations': ['Pastikan dataset memiliki minimal 2 kolom numerik']
         }
 
-def handle_distribution_analysis(df, question, categorical_col, numeric_col):
+def handle_distribution_analysis(df, command, categorical_col, numeric_col):
     """Handle distribution analysis"""
     if categorical_col and numeric_col:
         distribution = df.groupby(categorical_col)[numeric_col].agg(['count', 'sum', 'mean', 'std']).round(2)
@@ -538,17 +543,17 @@ def handle_distribution_analysis(df, question, categorical_col, numeric_col):
         ]
         
         return {
-            'answer': f'Distribusi {numeric_col} berdasarkan {categorical_col} berhasil dianalisis',
+            'answer': f'✅ Distribusi {numeric_col} berdasarkan {categorical_col} berhasil dianalisis',
             'insights': insights,
             'data': distribution.to_dict()
         }
     else:
         return {
-            'answer': 'Diperuhkan kolom kategorikal dan numerik untuk analisis distribusi',
+            'answer': '❌ Diperlukan kolom kategorikal dan numerik untuk analisis distribusi',
             'insights': ['Silakan pilih kolom kategorikal dan numerik di parameter analisis']
         }
 
-def handle_summary_analysis(df, question):
+def handle_summary_analysis(df, command):
     """Handle summary statistics"""
     numeric_summary = df.describe()
     categorical_summary = df.select_dtypes(include=['object']).describe()
@@ -562,7 +567,7 @@ def handle_summary_analysis(df, question):
     ]
     
     return {
-        'answer': 'Summary statistik dataset berhasil dihasilkan',
+        'answer': '✅ Summary statistik dataset berhasil dihasilkan',
         'insights': insights,
         'data': {
             'shape': list(df.shape),
@@ -573,7 +578,7 @@ def handle_summary_analysis(df, question):
         }
     }
 
-def handle_missing_analysis(df, question):
+def handle_missing_analysis(df, command):
     """Handle missing values analysis"""
     missing_data = df.isnull().sum()
     missing_percentage = (missing_data / len(df)) * 100
@@ -590,7 +595,7 @@ def handle_missing_analysis(df, question):
         insights.append(f'• {col}: {missing_data[col]} nilai hilang ({missing_percentage[col]:.2f}%)')
     
     return {
-        'answer': f'Analisis nilai hilang: {total_missing} nilai hilang ditemukan',
+        'answer': f'✅ Analisis nilai hilang: {total_missing} nilai hilang ditemukan',
         'insights': insights,
         'data': {
             'total_missing': int(total_missing),
@@ -599,7 +604,7 @@ def handle_missing_analysis(df, question):
         }
     }
 
-def handle_duplicate_analysis(df, question):
+def handle_duplicate_analysis(df, command):
     """Handle duplicate analysis"""
     duplicate_rows = df.duplicated().sum()
     duplicate_percentage = (duplicate_rows / len(df)) * 100
@@ -614,7 +619,7 @@ def handle_duplicate_analysis(df, question):
         insights.append('💡 Disarankan untuk menghapus baris duplikat untuk analisis yang lebih akurat')
     
     return {
-        'answer': f'Ditemukan {duplicate_rows} baris duplikat',
+        'answer': f'✅ Ditemukan {duplicate_rows} baris duplikat',
         'insights': insights,
         'data': {
             'duplicate_rows': int(duplicate_rows),
@@ -623,7 +628,7 @@ def handle_duplicate_analysis(df, question):
         }
     }
 
-def handle_outlier_analysis(df, question, numeric_col):
+def handle_outlier_analysis(df, command, numeric_col):
     """Handle outlier analysis"""
     if numeric_col:
         Q1 = df[numeric_col].quantile(0.25)
@@ -645,7 +650,7 @@ def handle_outlier_analysis(df, question, numeric_col):
         ]
         
         return {
-            'answer': f'Ditemukan {outlier_count} outlier pada {numeric_col}',
+            'answer': f'✅ Ditemukan {outlier_count} outlier pada {numeric_col}',
             'insights': insights,
             'data': {
                 'outlier_count': outlier_count,
@@ -656,89 +661,103 @@ def handle_outlier_analysis(df, question, numeric_col):
         }
     else:
         return {
-            'answer': 'Tidak ada kolom numerik yang dipilih untuk analisis outlier',
+            'answer': '❌ Tidak ada kolom numerik yang dipilih untuk analisis outlier',
             'insights': ['Silakan pilih kolom numerik di parameter analisis']
         }
 
-def handle_general_analysis(df, question):
-    """General analysis fallback with more specific responses"""
-    question_lower = question.lower()
+def handle_visualization_commands(df, command, numeric_col, categorical_col):
+    """Handle visualization-related commands"""
+    command_lower = command.lower()
     
-    # More specific responses for common question types
-    if any(word in question_lower for word in ['prediksi', 'model', 'machine learning']):
-        return {
-            'answer': 'Analisis prediktif membutuhkan modeling machine learning',
-            'insights': [
-                '🤖 Fitur prediksi membutuhkan implementasi model ML',
-                '📊 Untuk analisis dasar, gunakan pertanyaan deskriptif',
-                '💡 Coba analisis: total, rata-rata, distribusi, atau tren'
-            ],
-            'recommendations': [
-                'Gunakan pertanyaan 1-20 untuk analisis data eksploratif',
-                'Pertanyaan 21-30 untuk prediksi membutuhkan development lebih lanjut'
-            ]
-        }
-    elif any(word in question_lower for word in ['visualisasi', 'grafik', 'chart']):
-        return {
-            'answer': 'Visualisasi data tersedia dalam bentuk analisis numerik',
-            'insights': [
-                '📈 Untuk grafik interaktif, diperlukan integrasi plotly/matplotlib',
-                '📊 Data untuk visualisasi sudah tersedia di hasil analisis',
-                '💡 Gunakan hasil analisis untuk membuat visualisasi di tools lain'
-            ],
-            'recommendations': [
-                'Export hasil analisis untuk visualisasi di Excel/Tableau',
-                'Gunakan library Python seperti matplotlib, seaborn, plotly'
-            ]
-        }
-    elif any(word in question_lower for word in ['encoding', 'normalisasi', 'standarisasi']):
-        return {
-            'answer': 'Data preparation techniques tersedia sebagai panduan',
-            'insights': [
-                '🔧 Encoding: Ubah kategorikal ke numerik (one-hot, label encoding)',
-                '📐 Normalisasi: Scale data ke range 0-1',
-                '⚖️ Standarisasi: Scale data dengan mean=0, std=1',
-                '💡 Data saat ini masih dalam format original'
-            ],
-            'recommendations': [
-                'Gunakan pandas.get_dummies() untuk one-hot encoding',
-                'Gunakan StandardScaler dari sklearn untuk standarisasi',
-                'Gunakan MinMaxScaler untuk normalisasi'
-            ]
-        }
-    else:
-        return {
-            'answer': f'Saya menganalisis: "{question}"',
-            'insights': [
-                f'📊 Dataset: {df.shape[0]} baris, {df.shape[1]} kolom',
-                f'🔢 Kolom numerik: {len(df.select_dtypes(include=[np.number]).columns)}',
-                f'📝 Kolom teks: {len(df.select_dtypes(include=["object"]).columns)}',
-                f'📅 Kolom tanggal: {len(df.select_dtypes(include=["datetime64"]).columns)}',
-                '💡 Gunakan pertanyaan spesifik untuk analisis lebih detail'
-            ],
-            'recommendations': [
-                'Coba pertanyaan tentang total atau rata-rata',
-                'Analisis distribusi data kategorikal',
-                'Lihat tren data berdasarkan waktu',
-                'Analisis korelasi antar variabel numerik'
-            ],
-            'dataset_info': {
-                'shape': list(df.shape),
-                'columns': df.columns.tolist(),
-                'numeric_columns': df.select_dtypes(include=[np.number]).columns.tolist(),
-                'categorical_columns': df.select_dtypes(include=['object']).columns.tolist()
+    if any(word in command_lower for word in ['grafik batang', 'bar chart']):
+        if categorical_col and numeric_col:
+            return {
+                'answer': f'✅ Data untuk grafik batang {categorical_col} vs {numeric_col} siap',
+                'insights': [
+                    f'📊 Grafik batang: {categorical_col} vs {numeric_col}',
+                    f'📈 Total kategori: {df[categorical_col].nunique()}',
+                    f'🔢 Rata-rata {numeric_col}: {df[numeric_col].mean():,.2f}',
+                    '💡 Gunakan data di bawah untuk membuat visualisasi di Excel/Tableau'
+                ],
+                'data': df.groupby(categorical_col)[numeric_col].mean().to_dict()
             }
+    
+    elif any(word in command_lower for word in ['grafik garis', 'line chart', 'tren']):
+        date_cols = df.select_dtypes(include=['datetime64']).columns
+        if len(date_cols) > 0 and numeric_col:
+            date_col = date_cols[0]
+            monthly_trend = df.groupby(df[date_col].dt.to_period('M'))[numeric_col].mean()
+            return {
+                'answer': f'✅ Data untuk grafik garis tren {numeric_col} siap',
+                'insights': [
+                    f'📈 Grafik garis: Tren {numeric_col} over time',
+                    f'📅 Periode: {len(monthly_trend)} bulan',
+                    f'🔍 Kolom tanggal: {date_col}',
+                    '💡 Data trend bulanan tersedia untuk visualisasi'
+                ],
+                'data': monthly_trend.to_dict()
+            }
+    
+    return {
+        'answer': '✅ Perintah visualisasi diterima',
+        'insights': [
+            '📊 Data untuk visualisasi telah dipersiapkan',
+            '💡 Gunakan data di bawah untuk membuat visualisasi di tools favorit Anda',
+            '🎨 Recommended tools: Excel, Tableau, Python matplotlib/seaborn'
+        ],
+        'data': {
+            'numeric_columns': st.session_state.numeric_columns,
+            'categorical_columns': st.session_state.categorical_columns,
+            'date_columns': st.session_state.date_columns
         }
+    }
 
-# Initialize session state
-if 'file_uploaded' not in st.session_state:
-    st.session_state.file_uploaded = False
+def handle_segmentation_analysis(df, command):
+    """Handle segmentation analysis"""
+    # Simple RFM-like segmentation if we have customer data
+    customer_cols = [col for col in df.columns if any(word in col.lower() for word in ['customer', 'pelanggan', 'user', 'id'])]
+    amount_cols = [col for col in df.columns if any(word in col.lower() for word in ['amount', 'total', 'price', 'sales'])]
+    
+    if customer_cols and amount_cols:
+        customer_col = customer_cols[0]
+        amount_col = amount_cols[0]
+        
+        # Simple customer segmentation
+        customer_stats = df.groupby(customer_col).agg({
+            amount_col: ['count', 'sum', 'mean']
+        }).round(2)
+        
+        insights = [
+            f'👥 Total pelanggan unik: {len(customer_stats)}',
+            f'💰 Total transaksi: {len(df)}',
+            f'📊 Rata-rata transaksi per pelanggan: {customer_stats[(amount_col, 'count')].mean():.1f}',
+            f'🎯 Pelanggan terbaik: {customer_stats[(amount_col, 'sum')].idxmax()}'
+        ]
+        
+        return {
+            'answer': '✅ Segmentasi pelanggan berhasil dianalisis',
+            'insights': insights,
+            'data': customer_stats.head(10).to_dict()
+        }
+    
+    return {
+        'answer': '❌ Data tidak cukup untuk analisis segmentasi pelanggan',
+        'insights': [
+            'Diperlukan kolom pelanggan/customer dan kolom amount/penjualan',
+            f'Kolom customer ditemukan: {len(customer_cols)}',
+            f'Kolom amount ditemukan: {len(amount_cols)}'
+        ]
+    }
 
-# Run the app
-if __name__ == "__main__":
-    main()
-
-# Footer
-st.markdown("---")
-st.markdown("### 🚀 InsightFlow Analytics - 50 Pertanyaan Data Analyst")
-st.markdown("Dibuat dengan Streamlit | © 2024")
+def handle_general_analysis(df, command):
+    """General analysis fallback with more specific responses"""
+    command_lower = command.lower()
+    
+    # More specific responses for common command types
+    if any(word in command_lower for word in ['prediksi', 'model', 'machine learning', 'forecasting']):
+        return {
+            'answer': '✅ Permintaan analisis prediktif diterima',
+            'insights': [
+                '🤖 Analisis prediktif membutuhkan modeling machine learning',
+                '📊 Untuk analisis dasar, gunakan perintah deskriptif',
+                '💡 Rekomendasi: Coba per
