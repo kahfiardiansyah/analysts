@@ -4,30 +4,8 @@ import numpy as np
 from datetime import datetime
 import os
 
-# Try to import CORS, if not available, continue without it
-try:
-    from flask_cors import CORS
-    CORS_AVAILABLE = True
-except ImportError:
-    CORS_AVAILABLE = False
-    print("⚠️ flask_cors not available, running without CORS")
-
 # ============================================================================
-# SIMPLIFIED IMPORT - NO EXTERNAL DEPENDENCIES
-# ============================================================================
-
-# Set semua ke False karena file routes/services tidak ada
-ANALYSIS_ROUTES_AVAILABLE = False
-UPLOAD_ROUTES_AVAILABLE = False
-VISUALIZATION_ROUTES_AVAILABLE = False
-COMPLEX_ANALYSIS_AVAILABLE = False
-DATA_ANALYZER_AVAILABLE = False
-FILE_PROCESSOR_AVAILABLE = False
-
-print("🔧 Running in standalone mode - using built-in features only")
-
-# ============================================================================
-# MANUAL 50 QUESTIONS LIST - FALLBACK
+# MANUAL 50 QUESTIONS LIST
 # ============================================================================
 MANUAL_QUESTIONS = [
     # A. Analisis Deskriptif (1-10)
@@ -92,529 +70,380 @@ MANUAL_QUESTIONS = [
 ]
 
 # ============================================================================
-# FLASK APP INITIALIZATION
+# STREAMLIT APP
 # ============================================================================
-app = Flask(__name__)
+def main():
+    st.set_page_config(
+        page_title="InsightFlow Analytics", 
+        page_icon="📊", 
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
+    
+    # Sidebar
+    st.sidebar.title("🎯 InsightFlow Analytics")
+    st.sidebar.markdown("### 50 Pertanyaan Data Analyst")
+    st.sidebar.markdown("---")
+    
+    # Main content
+    st.title("📊 InsightFlow Analytics Dashboard")
+    st.markdown("Selamat datang! Upload file data Anda dan pilih pertanyaan analitis dari 50 pertanyaan yang tersedia.")
+    
+    # Tab layout
+    tab1, tab2, tab3 = st.tabs(["📋 Pertanyaan", "📁 Upload Data", "🔍 Analisis"])
+    
+    with tab1:
+        show_questions_tab()
+    
+    with tab2:
+        show_upload_tab()
+    
+    with tab3:
+        show_analysis_tab()
 
-if CORS_AVAILABLE:
-    CORS(app)
-else:
-    print("🚨 Running without CORS - frontend may have connection issues")
+def show_questions_tab():
+    """Display the 50 questions"""
+    st.header("📋 Daftar 50 Pertanyaan Analitis")
+    st.markdown("""
+    **Kategori Pertanyaan:**
+    - **1-10:** Analisis Deskriptif
+    - **11-20:** Analisis Eksploratif  
+    - **21-30:** Analisis Prediktif
+    - **31-40:** Data Preparation
+    - **41-50:** Visualisasi Data
+    """)
+    
+    # Display questions in expandable sections
+    categories = {
+        "Analisis Deskriptif (1-10)": MANUAL_QUESTIONS[0:10],
+        "Analisis Eksploratif (11-20)": MANUAL_QUESTIONS[10:20],
+        "Analisis Prediktif (21-30)": MANUAL_QUESTIONS[20:30],
+        "Data Preparation (31-40)": MANUAL_QUESTIONS[30:40],
+        "Visualisasi Data (41-50)": MANUAL_QUESTIONS[40:50]
+    }
+    
+    for category, questions in categories.items():
+        with st.expander(f"📂 {category}"):
+            for i, question in enumerate(questions, start=1):
+                st.write(f"**{i}.** {question}")
 
-# Config
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file
-app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['DATA_FOLDER'] = 'data'
+def show_upload_tab():
+    """Handle file upload and display"""
+    st.header("📁 Upload File Data")
+    
+    uploaded_file = st.file_uploader(
+        "Pilih file CSV atau Excel", 
+        type=['csv', 'xlsx'],
+        help="Upload file data Anda untuk dianalisis"
+    )
+    
+    if uploaded_file is not None:
+        try:
+            # Read file
+            if uploaded_file.name.endswith('.csv'):
+                df = pd.read_csv(uploaded_file)
+            else:
+                df = pd.read_excel(uploaded_file)
+            
+            st.success(f"✅ File berhasil diupload!")
+            
+            # Display file info
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("📊 Baris", df.shape[0])
+            with col2:
+                st.metric("📈 Kolom", df.shape[1])
+            with col3:
+                st.metric("🔢 Numerik", len(df.select_dtypes(include=[np.number]).columns))
+            with col4:
+                st.metric("📝 Kategorikal", len(df.select_dtypes(include=['object']).columns))
+            
+            # Data preview
+            st.subheader("👀 Preview Data")
+            st.dataframe(df.head(10), use_container_width=True)
+            
+            # Column info
+            st.subheader("📋 Informasi Kolom")
+            col_info = pd.DataFrame({
+                'Kolom': df.columns,
+                'Tipe Data': df.dtypes,
+                'Nilai Unik': [df[col].nunique() for col in df.columns],
+                'Nilai Hilang': [df[col].isnull().sum() for col in df.columns]
+            })
+            st.dataframe(col_info, use_container_width=True)
+            
+            # Data quality
+            st.subheader("📊 Kualitas Data")
+            missing_percentage = (df.isnull().sum().sum() / (len(df) * len(df.columns))) * 100
+            duplicated_rows = df.duplicated().sum()
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("📉 Nilai Hilang", f"{missing_percentage:.2f}%")
+            with col2:
+                st.metric("🔄 Baris Duplikat", duplicated_rows)
+            
+            # Store dataframe in session state
+            st.session_state.df = df
+            st.session_state.file_uploaded = True
+            st.session_state.filename = uploaded_file.name
+            
+        except Exception as e:
+            st.error(f"❌ Error membaca file: {str(e)}")
+    else:
+        st.info("📁 Silakan upload file CSV atau Excel untuk memulai analisis")
+        st.session_state.file_uploaded = False
 
-# ============================================================================
-# HEALTH CHECK & BASIC ENDPOINTS
-# ============================================================================
-@app.route('/health', methods=['GET'])
-def health_check():
-    return jsonify({
-        'status': 'healthy 🎉',
-        'message': 'InsightFlow API is running!',
-        'timestamp': datetime.now().isoformat(),
-        'features': {
-            'analysis_routes': ANALYSIS_ROUTES_AVAILABLE,
-            'upload_routes': UPLOAD_ROUTES_AVAILABLE,
-            'visualization_routes': VISUALIZATION_ROUTES_AVAILABLE,
-            'complex_analysis': COMPLEX_ANALYSIS_AVAILABLE,
-            'data_analyzer': DATA_ANALYZER_AVAILABLE,
-            'file_processor': FILE_PROCESSOR_AVAILABLE,
-            '50_questions': True  # Selalu true karena manual fallback
-        }
-    })
-
-@app.route('/', methods=['GET'])
-def home():
-    return jsonify({
-        'message': 'Welcome to InsightFlow Analytics! 🚀',
-        'version': '2.0 - Enhanced with 50 Questions',
-        'endpoints': {
-            'health': '/health (GET)',
-            'upload': '/upload (POST)',
-            'analyze': '/analyze (POST)',
-            'visualize': '/visualize (POST)',
-            'files': '/api/files (GET)',
-            'questions': '/api/questions (GET)'
-        }
-    })
-
-# ============================================================================
-# QUESTIONS ENDPOINT - FIXED WITH MANUAL FALLBACK
-# ============================================================================
-@app.route('/api/questions', methods=['GET'])
-def get_questions():
-    """Get all available 50 questions - dengan manual fallback"""
-    return jsonify({
-        'success': True,
-        'total_questions': len(MANUAL_QUESTIONS),
-        'questions': MANUAL_QUESTIONS,
-        'categories': {
-            'Analisis Deskriptif': 'Pertanyaan 1-10 tentang data dasar',
-            'Analisis Eksploratif': 'Pertanyaan 11-20 tentang pattern & insight', 
-            'Analisis Prediktif': 'Pertanyaan 21-30 tentang prediksi & modeling',
-            'Data Preparation': 'Pertanyaan 31-40 tentang cleaning data',
-            'Visualisasi Data': 'Pertanyaan 41-50 tentang chart & grafik'
-        },
-        'source': 'manual_fallback',
-        'message': '✅ 50 pertanyaan data analyst berhasil di-load!'
-    }), 200
-
-# ============================================================================
-# CORE ANALYSIS ENDPOINT (WITH 50 QUESTIONS SUPPORT)
-# ============================================================================
-@app.route('/analyze', methods=['POST'])
-def analyze_data():
-    """Main analysis endpoint dengan 50 questions support"""
-    try:
-        data = request.get_json()
-        
-        if not data or 'question' not in data:
-            return jsonify({
-                'success': False,
-                'error': 'Please provide a question in JSON format',
-                'example': {
-                    'question': 'Bagaimana trend penjualan?',
-                    'filename': 'optional_filename.csv'
-                }
-            }), 400
-        
-        question = data.get('question', '').strip()
-        filename = data.get('filename', '')
-        
-        if not question:
-            return jsonify({
-                'success': False,
-                'error': 'Question cannot be empty'
-            }), 400
-        
-        # Load dataset jika filename provided
-        df = None
-        if filename:
-            df = load_uploaded_file(filename)
-            if df is None:
-                return jsonify({
-                    'success': False,
-                    'error': f'File {filename} not found or unable to load'
-                }), 404
+def show_analysis_tab():
+    """Handle data analysis"""
+    st.header("🔍 Analisis Data")
+    
+    if not st.session_state.get('file_uploaded', False):
+        st.warning("⚠️ Silakan upload file data terlebih dahulu di tab 'Upload Data'")
+        return
+    
+    df = st.session_state.df
+    
+    # Question selection
+    st.subheader("🎯 Pilih Pertanyaan Analitis")
+    selected_question = st.selectbox(
+        "Pilih pertanyaan:",
+        options=MANUAL_QUESTIONS,
+        index=0,
+        help="Pilih salah satu dari 50 pertanyaan analitis"
+    )
+    
+    # Additional parameters
+    st.subheader("⚙️ Parameter Analisis")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        numeric_columns = df.select_dtypes(include=[np.number]).columns
+        if len(numeric_columns) > 0:
+            numeric_column = st.selectbox(
+                "Pilih kolom numerik:",
+                options=numeric_columns
+            )
         else:
-            # Use sample data jika tidak ada file
-            df = generate_sample_data()
-        
-        # Fallback simple analysis dengan question matching
-        result = handle_simple_analysis(df, question)
-        result['analysis_engine'] = 'simple_fallback'
-        
-        return jsonify(result), 200
-        
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Analysis failed: {str(e)}',
-            'timestamp': datetime.now().isoformat()
-        }), 500
+            numeric_column = None
+            st.warning("Tidak ada kolom numerik dalam dataset")
+    
+    with col2:
+        categorical_columns = df.select_dtypes(include=['object']).columns
+        if len(categorical_columns) > 0:
+            categorical_column = st.selectbox(
+                "Pilih kolom kategorikal:",
+                options=categorical_columns
+            )
+        else:
+            categorical_column = None
+            st.warning("Tidak ada kolom kategorikal dalam dataset")
+    
+    # Analysis button
+    if st.button("🚀 Jalankan Analisis", type="primary"):
+        with st.spinner("Menjalankan analisis..."):
+            try:
+                # Perform analysis based on question type
+                result = perform_analysis(df, selected_question, numeric_column, categorical_column)
+                
+                # Display results
+                st.subheader("📊 Hasil Analisis")
+                st.success(f"**Pertanyaan:** {selected_question}")
+                
+                if 'answer' in result:
+                    st.info(f"**Jawaban:** {result['answer']}")
+                
+                if 'insights' in result:
+                    st.subheader("💡 Insights")
+                    for insight in result['insights']:
+                        st.write(f"• {insight}")
+                
+                if 'data' in result and result['data']:
+                    st.subheader("📈 Data Hasil")
+                    st.json(result['data'])
+                    
+            except Exception as e:
+                st.error(f"❌ Error dalam analisis: {str(e)}")
 
-def handle_simple_analysis(df, question):
-    """Simple analysis fallback dengan basic question matching"""
+def perform_analysis(df, question, numeric_col=None, categorical_col=None):
+    """Perform analysis based on question type"""
     question_lower = question.lower()
     
-    # Basic pattern matching
+    # Basic pattern matching for different question types
     if any(word in question_lower for word in ['total', 'jumlah', 'sum']):
-        return handle_total_analysis(df, question)
+        return handle_total_analysis(df, question, numeric_col)
     elif any(word in question_lower for word in ['rata', 'average', 'mean']):
-        return handle_average_analysis(df, question)
+        return handle_average_analysis(df, question, numeric_col)
     elif any(word in question_lower for word in ['terlaris', 'terbanyak', 'top']):
-        return handle_top_analysis(df, question)
+        return handle_top_analysis(df, question, categorical_col)
     elif any(word in question_lower for word in ['tren', 'trend', 'perkembangan']):
-        return handle_trend_analysis(df, question)
+        return handle_trend_analysis(df, question, numeric_col)
+    elif any(word in question_lower for word in ['korelasi', 'correlation']):
+        return handle_correlation_analysis(df, question)
     else:
         return handle_general_analysis(df, question)
 
-def handle_total_analysis(df, question):
+def handle_total_analysis(df, question, numeric_col):
     """Handle total-related questions"""
-    numeric_cols = df.select_dtypes(include=[np.number]).columns
-    
-    if len(numeric_cols) > 0:
-        col = numeric_cols[0]
-        total = df[col].sum()
-        
+    if numeric_col:
+        total = df[numeric_col].sum()
         return {
-            'success': True,
-            'question': question,
-            'answer': f'Total {col}: {total:,.2f}',
+            'answer': f'Total {numeric_col}: {total:,.2f}',
             'insights': [
-                f'📊 Total nilai pada kolom {col}: {total:,.2f}',
-                f'🔢 Berdasarkan {len(df)} baris data'
+                f'📊 Total nilai pada kolom {numeric_col}: {total:,.2f}',
+                f'🔢 Berdasarkan {len(df)} baris data',
+                f'📈 Nilai rata-rata: {df[numeric_col].mean():,.2f}',
+                f'🎯 Nilai tertinggi: {df[numeric_col].max():,.2f}',
+                f'📉 Nilai terendah: {df[numeric_col].min():,.2f}'
             ],
             'data': {
-                'total': total,
-                'column': col,
-                'rows_analyzed': len(df)
+                'total': float(total),
+                'column': numeric_col,
+                'rows_analyzed': len(df),
+                'average': float(df[numeric_col].mean()),
+                'max': float(df[numeric_col].max()),
+                'min': float(df[numeric_col].min())
             }
         }
     else:
         return {
-            'success': True,
-            'question': question,
-            'answer': 'Tidak ditemukan kolom numerik untuk menghitung total',
-            'insights': ['Dataset tidak memiliki kolom numerik']
+            'answer': 'Tidak ada kolom numerik yang dipilih',
+            'insights': ['Silakan pilih kolom numerik untuk analisis total']
         }
 
-def handle_average_analysis(df, question):
+def handle_average_analysis(df, question, numeric_col):
     """Handle average-related questions"""
-    numeric_cols = df.select_dtypes(include=[np.number]).columns
-    
-    if len(numeric_cols) > 0:
-        col = numeric_cols[0]
-        avg = df[col].mean()
-        
+    if numeric_col:
+        avg = df[numeric_col].mean()
         return {
-            'success': True,
-            'question': question,
-            'answer': f'Rata-rata {col}: {avg:,.2f}',
+            'answer': f'Rata-rata {numeric_col}: {avg:,.2f}',
             'insights': [
-                f'📈 Rata-rata {col}: {avg:,.2f}',
-                f'📊 Nilai tertinggi: {df[col].max():,.2f}',
-                f'📉 Nilai terendah: {df[col].min():,.2f}'
-            ]
-        }
-    else:
-        return handle_general_analysis(df, question)
-
-def handle_top_analysis(df, question):
-    """Handle top-related questions"""
-    # Cari kolom categorical untuk top items
-    cat_cols = df.select_dtypes(include=['object']).columns
-    
-    if len(cat_cols) > 0:
-        col = cat_cols[0]
-        top_items = df[col].value_counts().head(5)
-        
-        return {
-            'success': True,
-            'question': question,
-            'answer': f'Top 5 {col}: {top_items.index[0]} ({top_items.iloc[0]} occurrences)',
-            'insights': [
-                f'🏆 {col} teratas: {top_items.index[0]}',
-                f'📊 Distribusi: {len(top_items)} unique values'
+                f'📈 Rata-rata {numeric_col}: {avg:,.2f}',
+                f'📊 Nilai tertinggi: {df[numeric_col].max():,.2f}',
+                f'📉 Nilai terendah: {df[numeric_col].min():,.2f}',
+                f'📋 Standar deviasi: {df[numeric_col].std():,.2f}',
+                f'🔢 Jumlah data: {len(df)} baris'
             ],
-            'top_items': top_items.to_dict()
+            'data': {
+                'average': float(avg),
+                'max': float(df[numeric_col].max()),
+                'min': float(df[numeric_col].min()),
+                'std': float(df[numeric_col].std()),
+                'count': len(df)
+            }
         }
     else:
         return handle_general_analysis(df, question)
 
-def handle_trend_analysis(df, question):
+def handle_top_analysis(df, question, categorical_col):
+    """Handle top-related questions"""
+    if categorical_col:
+        top_items = df[categorical_col].value_counts().head(5)
+        return {
+            'answer': f'Top 5 {categorical_col}: {top_items.index[0]} ({top_items.iloc[0]} occurrences)',
+            'insights': [
+                f'🏆 {categorical_col} teratas: {top_items.index[0]}',
+                f'📊 Distribusi: {len(top_items)} unique values',
+                f'📈 Total categories: {df[categorical_col].nunique()}',
+                f'🔢 Total data points: {len(df)}'
+            ],
+            'data': top_items.to_dict()
+        }
+    else:
+        return handle_general_analysis(df, question)
+
+def handle_trend_analysis(df, question, numeric_col):
     """Handle trend-related questions"""
     date_cols = df.select_dtypes(include=['datetime64']).columns
-    numeric_cols = df.select_dtypes(include=[np.number]).columns
     
-    if len(date_cols) > 0 and len(numeric_cols) > 0:
+    if len(date_cols) > 0 and numeric_col:
         date_col = date_cols[0]
-        num_col = numeric_cols[0]
-        
         # Simple trend analysis
         if hasattr(df[date_col], 'dt'):
-            monthly_trend = df.groupby(df[date_col].dt.to_period('M'))[num_col].mean()
-            
+            monthly_trend = df.groupby(df[date_col].dt.to_period('M'))[numeric_col].mean()
             return {
-                'success': True,
-                'question': question,
-                'answer': f'Tren {num_col} berdasarkan waktu dianalisis',
+                'answer': f'Tren {numeric_col} berdasarkan waktu dianalisis',
                 'insights': [
-                    f'📈 Tren {num_col} per bulan berhasil dihitung',
-                    f'📅 Periode: {len(monthly_trend)} bulan'
+                    f'📈 Tren {numeric_col} per bulan berhasil dihitung',
+                    f'📅 Periode: {len(monthly_trend)} bulan',
+                    f'📊 Rata-rata overall: {df[numeric_col].mean():,.2f}',
+                    f'🔍 Kolom tanggal: {date_col}'
                 ],
-                'trend_data': monthly_trend.to_dict()
+                'data': monthly_trend.to_dict()
             }
     
     return handle_general_analysis(df, question)
 
+def handle_correlation_analysis(df, question):
+    """Handle correlation analysis"""
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    if len(numeric_cols) >= 2:
+        correlation_matrix = df[numeric_cols].corr()
+        # Get top correlation pairs
+        correlations = []
+        for i in range(len(numeric_cols)):
+            for j in range(i+1, len(numeric_cols)):
+                corr = correlation_matrix.iloc[i, j]
+                correlations.append({
+                    'variables': f"{numeric_cols[i]} vs {numeric_cols[j]}",
+                    'correlation': float(corr)
+                })
+        
+        # Sort by absolute correlation
+        correlations.sort(key=lambda x: abs(x['correlation']), reverse=True)
+        
+        return {
+            'answer': f'Analisis korelasi antara {len(numeric_cols)} variabel numerik',
+            'insights': [
+                f'📈 Ditemukan {len(correlations)} pasangan korelasi',
+                f'🔗 Korelasi terkuat: {correlations[0]["variables"]} ({correlations[0]["correlation"]:.3f})',
+                f'📊 Total variabel numerik: {len(numeric_cols)}'
+            ],
+            'data': {
+                'top_correlations': correlations[:5],
+                'total_variables': len(numeric_cols)
+            }
+        }
+    else:
+        return {
+            'answer': 'Tidak cukup kolom numerik untuk analisis korelasi',
+            'insights': ['Dibutuhkan minimal 2 kolom numerik untuk analisis korelasi']
+        }
+
 def handle_general_analysis(df, question):
     """General analysis fallback"""
     return {
-        'success': True,
-        'question': question,
         'answer': f'Saya menganalisis: "{question}"',
         'insights': [
             f'📊 Dataset: {df.shape[0]} baris, {df.shape[1]} kolom',
             f'🔢 Kolom numerik: {len(df.select_dtypes(include=[np.number]).columns)}',
             f'📝 Kolom teks: {len(df.select_dtypes(include=["object"]).columns)}',
+            f'📅 Kolom tanggal: {len(df.select_dtypes(include=["datetime64"]).columns)}',
             '💡 Gunakan pertanyaan spesifik untuk analisis lebih detail'
         ],
         'recommendations': [
-            'Upload file CSV/Excel untuk analisis real data',
-            'Gunakan pertanyaan dari 50 questions list',
-            'Contoh: "Bagaimana total penjualan?" atau "Apa produk terlaris?"'
+            'Coba pertanyaan tentang total atau rata-rata',
+            'Analisis distribusi data kategorikal',
+            'Lihat tren data berdasarkan waktu',
+            'Analisis korelasi antar variabel numerik'
         ],
         'dataset_info': {
-            'shape': df.shape,
+            'shape': list(df.shape),
             'columns': df.columns.tolist(),
-            'data_types': df.dtypes.astype(str).to_dict()
+            'numeric_columns': df.select_dtypes(include=[np.number]).columns.tolist(),
+            'categorical_columns': df.select_dtypes(include=['object']).columns.tolist()
         }
     }
 
-# ============================================================================
-# FILE UPLOAD ENDPOINT
-# ============================================================================
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    """Enhanced upload endpoint dengan real data processing"""
-    try:
-        if 'file' not in request.files:
-            return jsonify({'success': False, 'error': 'No file uploaded'}), 400
-        
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({'success': False, 'error': 'No file selected'}), 400
-        
-        # Validasi file extension
-        allowed_extensions = ['.csv', '.xlsx', '.xls']
-        file_extension = os.path.splitext(file.filename)[1].lower()
-        if file_extension not in allowed_extensions:
-            return jsonify({
-                'success': False, 
-                'error': f'File type not supported. Allowed: {", ".join(allowed_extensions)}'
-            }), 400
-        
-        # Save file
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f"{timestamp}_{file.filename}"
-        filepath = os.path.join('uploads', filename)
-        
-        # Ensure upload directory exists
-        os.makedirs('uploads', exist_ok=True)
-        file.save(filepath)
-        
-        # Process file untuk mendapatkan real data
-        file_size = os.path.getsize(filepath)
-        
-        try:
-            # Load data dengan pandas
-            if file_extension == '.csv':
-                df = pd.read_csv(filepath)
-            else:
-                df = pd.read_excel(filepath)
-            
-            # Generate real preview data
-            preview_data = df.head(10).replace({np.nan: None}).to_dict('records')
-            
-            # Basic info
-            basic_info = {
-                'rows': len(df),
-                'columns': len(df.columns),
-                'column_names': df.columns.tolist(),
-                'data_types': df.dtypes.astype(str).to_dict()
-            }
-            
-            # Data quality analysis
-            missing_values = df.isnull().sum().to_dict()
-            duplicated_rows = df.duplicated().sum()
-            missing_percentage = (df.isnull().sum().sum() / (len(df) * len(df.columns))) * 100
-            
-            result = {
-                'success': True,
-                'message': 'File uploaded and analyzed successfully',
-                'filename': filename,
-                'original_filename': file.filename,
-                'filepath': filepath,
-                'file_size': file_size,
-                'file_size_mb': round(file_size / (1024 * 1024), 2),
-                'preview': preview_data,
-                'basic_info': basic_info,
-                'data_quality': {
-                    'missing_values': missing_values,
-                    'missing_percentage': round(missing_percentage, 2),
-                    'duplicated_rows': duplicated_rows,
-                    'total_cells': len(df) * len(df.columns)
-                },
-                'timestamp': datetime.now().isoformat()
-            }
-            
-        except Exception as processing_error:
-            # Fallback jika processing gagal
-            result = {
-                'success': True,
-                'message': 'File uploaded (processing limited)',
-                'filename': filename,
-                'original_filename': file.filename,
-                'filepath': filepath,
-                'file_size': file_size,
-                'file_size_mb': round(file_size / (1024 * 1024), 2),
-                'preview': [],
-                'basic_info': {'rows': 0, 'columns': 0},
-                'data_quality': {'missing_percentage': 0, 'duplicated_rows': 0},
-                'warning': f'Data processing limited: {str(processing_error)}'
-            }
-        
-        return jsonify(result), 200
-        
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Upload failed: {str(e)}'
-        }), 500
+# Initialize session state
+if 'file_uploaded' not in st.session_state:
+    st.session_state.file_uploaded = False
 
-# ============================================================================
-# VISUALIZATION ENDPOINT
-# ============================================================================
-@app.route('/visualize', methods=['POST'])
-def generate_visualizations():
-    """Enhanced visualization dengan real data"""
-    try:
-        data = request.get_json()
-        
-        if not data or 'filename' not in data:
-            return jsonify({'success': False, 'error': 'Filename required'}), 400
-        
-        filename = data['filename']
-        filepath = os.path.join('uploads', filename)
-        
-        if not os.path.exists(filepath):
-            return jsonify({'success': False, 'error': 'File not found'}), 404
-        
-        # Load dataset
-        file_extension = os.path.splitext(filename)[1].lower()
-        if file_extension == '.csv':
-            df = pd.read_csv(filepath)
-        else:
-            df = pd.read_excel(filepath)
-        
-        # Generate real visualizations
-        charts = generate_real_charts(df)
-        
-        return jsonify({
-            'success': True,
-            'message': 'Visualizations generated successfully',
-            'filename': filename,
-            'charts': charts,
-            'chart_count': sum(len(charts[key]) for key in charts)
-        }), 200
-        
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Visualization failed: {str(e)}'
-        }), 500
+# Run the app
+if __name__ == "__main__":
+    main()
 
-# ============================================================================
-# FILE MANAGEMENT ENDPOINTS
-# ============================================================================
-@app.route('/api/files', methods=['GET'])
-def list_uploaded_files():
-    """List semua uploaded files"""
-    try:
-        files = []
-        if os.path.exists('uploads'):
-            for filename in os.listdir('uploads'):
-                filepath = os.path.join('uploads', filename)
-                if os.path.isfile(filepath):
-                    files.append({
-                        'name': filename,
-                        'size': os.path.getsize(filepath),
-                        'size_mb': round(os.path.getsize(filepath) / (1024 * 1024), 2),
-                        'modified': datetime.fromtimestamp(os.path.getmtime(filepath)).isoformat()
-                    })
-        
-        return jsonify({
-            'success': True,
-            'total_files': len(files),
-            'files': files
-        }), 200
-        
-    except Exception as e:
-        return jsonify({
-            'success': False,
-            'error': f'Failed to list files: {str(e)}'
-        }), 500
-
-# ============================================================================
-# HELPER FUNCTIONS
-# ============================================================================
-def load_uploaded_file(filename):
-    """Load uploaded file dari uploads directory"""
-    if not filename:
-        return None
-    
-    filepath = os.path.join('uploads', filename)
-    if not os.path.exists(filepath):
-        return None
-    
-    try:
-        if filename.endswith('.csv'):
-            return pd.read_csv(filepath)
-        elif filename.endswith(('.xlsx', '.xls')):
-            return pd.read_excel(filepath)
-        else:
-            return None
-    except Exception as e:
-        print(f"Error loading file {filename}: {e}")
-        return None
-
-def generate_sample_data():
-    """Generate sample data untuk testing"""
-    return pd.DataFrame({
-        'date': pd.date_range('2024-01-01', periods=100, freq='D'),
-        'product': ['Product A', 'Product B', 'Product C'] * 33 + ['Product A'],
-        'sales': np.random.randint(50, 500, 100),
-        'price': np.random.uniform(10, 100, 100),
-        'customer_id': range(1, 101),
-        'region': ['Jakarta', 'Surabaya', 'Bandung'] * 33 + ['Jakarta'],
-        'category': ['Electronics', 'Fashion', 'Home'] * 33 + ['Electronics']
-    })
-
-def generate_real_charts(df):
-    """Generate real charts dari dataset"""
-    charts = {
-        'histograms': {},
-        'barcharts': {},
-        'linecharts': {}
-    }
-    
-    # Analyze numeric columns untuk histograms
-    numeric_columns = df.select_dtypes(include=[np.number]).columns
-    for col in numeric_columns[:3]:  # Max 3 histograms
-        if len(df[col].unique()) > 1:
-            hist, bins = np.histogram(df[col].dropna(), bins=10)
-            charts['histograms'][col] = {
-                'labels': [f"{bins[i]:.1f}-{bins[i+1]:.1f}" for i in range(len(bins)-1)],
-                'data': hist.tolist()
-            }
-    
-    # Analyze categorical columns untuk barcharts
-    categorical_columns = df.select_dtypes(include=['object']).columns
-    for col in categorical_columns[:2]:  # Max 2 barcharts
-        value_counts = df[col].value_counts().head(10)
-        if len(value_counts) > 0:
-            charts['barcharts'][col] = {
-                'labels': value_counts.index.tolist(),
-                'data': value_counts.values.tolist()
-            }
-    
-    return charts
-
-# ============================================================================
-# APPLICATION STARTUP
-# ============================================================================
-if __name__ == '__main__':
-    print("=" * 60)
-    print("🚀 INSIGHTFLOW API STARTING...")
-    print("=" * 60)
-    print(f"📍 Health Check: http://localhost:8000/health")
-    print(f"📍 Homepage: http://localhost:8000/")
-    print(f"📍 Questions: http://localhost:8000/api/questions")
-    print("=" * 60)
-    print("🔧 Loaded Features:")
-    print(f"   • 50 Questions: ✅ ALWAYS AVAILABLE")
-    print(f"   • File Upload: ✅ AVAILABLE") 
-    print(f"   • Basic Analysis: ✅ AVAILABLE")
-    print(f"   • Visualization: ✅ AVAILABLE")
-    print("=" * 60)
-    
-    # Ensure directories exist
-    os.makedirs('uploads', exist_ok=True)
-    os.makedirs('data', exist_ok=True)
-    
-
-    app.run(host='0.0.0.0', port=8000, debug=True)
+# Footer
+st.markdown("---")
+st.markdown("### 🚀 InsightFlow Analytics - 50 Pertanyaan Data Analyst")
+st.markdown("Dibuat dengan Streamlit | © 2024")
